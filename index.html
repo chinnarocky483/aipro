@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&display=swap" rel="stylesheet">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCprsqSxw-1izeK_jI-Gv7E10BpEgYqOdI",
+      authDomain: "webws-be1bc.firebaseapp.com",
+      databaseURL: "https://webws-be1bc-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      projectId: "webws-be1bc",
+      storageBucket: "webws-be1bc.firebasestorage.app",
+      messagingSenderId: "980545262011",
+      appId: "1:980545262011:web:26853ab64813c01c8ff49e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const keyInput = document.getElementById("keyInput");
+      const loginBtn = document.getElementById("loginBtn");
+      const messageText = document.getElementById("messageText");
+      const deviceID = navigator.userAgent || "UnknownDevice";
+
+      loginBtn.addEventListener("click", async () => {
+        const key = keyInput.value.trim();
+        if (key === "") return;
+
+        const snapshot = await get(ref(db, "keys"));
+        if (!snapshot.exists()) {
+          messageText.textContent = "KEY WASN'T EXIST";
+          messageText.className = "text-red-500 font-bold";
+          return;
+        }
+
+        let keyFound = false;
+        let keyID = null;
+        let existingDevice = null;
+
+        snapshot.forEach(childSnapshot => {
+          const data = childSnapshot.val();
+          if (data.key === key) {
+            keyFound = true;
+            keyID = childSnapshot.key;
+            existingDevice = data.deviceID;
+          }
+        });
+
+        if (!keyFound) {
+          messageText.textContent = "KEY WASN'T EXIST";
+          messageText.className = "text-red-500 font-bold";
+        } else if (existingDevice !== "NA" && existingDevice !== deviceID) {
+          messageText.textContent = "The Key Is Already Login By Another User";
+          messageText.className = "text-red-500 font-bold";
+        } else {
+          await update(ref(db, "keys/" + keyID), { deviceID });
+          window.location.href = "op.html";
+        }
+      });
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: url('https://imageshere.github.io/Is-best-images-isavailble/IMG_20250405_093531_868.jpg') no-repeat center center fixed;
+      background-size: cover;
+      overflow: hidden;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.75);
+      border: 2px solid transparent;
+      border-image: linear-gradient(45deg, #00ffff, #ff00ff) 1;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 25px #00fff7, 0 0 50px #ae00ff;
+      backdrop-filter: blur(8px);
+      animation: pulse-glow 3s infinite;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #00fff7;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #ae00ff;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border-radius: 8px;
+      background: #111;
+      color: #00fff7;
+      border: 2px solid #00fff7;
+      text-align: center;
+      font-size: 18px;
+      box-shadow: 0 0 10px #00fff7;
+    }
+
+    button {
+  position: relative;
+  width: 100%;
+  margin-top: 20px;
+  padding: 16px;
+  background: #111;
+  border: 2px solid #00fff7;
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 15px #00fff7;
+  overflow: hidden;
+  z-index: 1;
+}
+
+button::before {
+  content: 'LOGIN';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg, #00fff7, #ae00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  font-size: 20px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+button span {
+  visibility: hidden;
+}
+
+    }
+
+    button:hover {
+      box-shadow: 0 0 30px #ae00ff;
+      transform: scale(1.05);
+    }
+
+    .link {
+      margin-top: 20px;
+      color: #00fff7;
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 0 0 8px #00ffff;
+      cursor: pointer;
+    }
+
+    #messageText {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 0 0 5px red;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 15px #00fff7, 0 0 30px #ae00ff;
+      }
+      50% {
+        box-shadow: 0 0 25px #ae00ff, 0 0 45px #00fff7;
+      }
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center min-h-screen">
+
+  <div class="container">
+    <h1>ROCKY AI LOGIN</h1>
+    <input type="text" id="keyInput" placeholder="Enter Key" />
+    <p id="messageText"></p>
+    <button id="loginBtn">LOGIN</button>
+    <p class="link">Don't Have Key? <span class="font-bold">Buy Here</span></p>
+  </div>
+
+</body>
+</html>
